@@ -8,11 +8,17 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\Valid;
 
 /**
  * @ORM\Entity(repositoryClass=PostRepository::class)
  */
 #[ApiResource(
+    collectionOperations: [
+        'get',
+        'post',
+    ],
     itemOperations: [
         'get' => [
             'normalization_context' => ['groups' => ['read:collection', 'read:item', 'read:post']]
@@ -36,7 +42,10 @@ class Post
     /**
      * @ORM\Column(type="string", length=255)
      */
-    #[Groups(['read:collection', 'write:Post'])]
+    #[
+        Groups(['read:collection', 'write:Post']),
+        Length(min: 5)
+    ]
     private ?string $title = null;
 
     /**
@@ -63,9 +72,12 @@ class Post
     private ?DateTimeInterface $updatedAt;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="posts")
+     * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="posts", cascade={"persist", "remove"})
      */
-    #[Groups(['read:item', 'write:Post'])]
+    #[
+        Groups(['read:item', 'write:Post']),
+        Valid()
+    ]
     private ?Category $category = null;
 
     public function __construct()
