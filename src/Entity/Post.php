@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use App\Controller\PostCountController;
+use App\Controller\PostPublishController;
 use App\Repository\PostRepository;
 use DateTime;
 use DateTimeInterface;
@@ -21,23 +24,80 @@ use Symfony\Component\Validator\Constraints\Valid;
     collectionOperations: [
         'get',
         'post',
+        'count' => [
+            'method' => 'GET',
+            'path' => '/posts/count',
+            'controller' => PostCountController::class,
+            'read' => false,
+            'pagination_enabled' => false,
+            'filters' => [],
+            'openapi_context' => [
+                'summary' => 'Récupère le nombre total d\'articles',
+                'parameters' => [
+                    [
+                        'in' => 'query',
+                        'name' => 'online',
+                        'schema' => [
+                            'type' => 'integer',
+                            'maximum' => 1,
+                            'minimum' => 0,
+                        ],
+                        'description' => 'Filtre les articles en ligne',
+                    ],
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'OK',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'integer',
+                                    'exemple' => 3,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ],
     itemOperations: [
         'get' => [
-            'normalization_context' => ['groups' => ['read:collection', 'read:item', 'read:post']]
+            'normalization_context' => [
+                'groups' => ['read:collection', 'read:item', 'read:post'],
+                'openapi_definition_name' => 'Detail',
+            ],
         ],
         'put',
         'delete',
+        'publish' => [
+            'method' => 'POST',
+            'path' => '/posts/{id}/publish',
+            'controller' => PostPublishController::class,
+            'openapi_context' => [
+                'summary' => 'Permet de publier un article',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [],
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ],
     denormalizationContext: ['groups' => ['write:Post']],
-    normalizationContext: ['groups' => ['read:collection']],
+    normalizationContext: [
+        'groups' => ['read:collection'],
+        'openapi_definition_name' => 'Collection',
+    ],
     paginationClientItemsPerPage: true,
     paginationItemsPerPage: 2,
     paginationMaximumItemsPerPage: 2,
     ),
     ApiFilter(
         SearchFilter::class,
-        properties: ['id' => 'exact', 'title' => 'partial']
+        properties: ['id' => 'exact', 'title' => 'partial'],
     )
 ]
 class Post
@@ -90,6 +150,15 @@ class Post
         Valid()
     ]
     private ?Category $category = null;
+
+    /**
+     * @ORM\Column(type="boolean", options={"default": "0"})
+     */
+    #[
+        Groups(['read:collection']),
+        ApiProperty(openapiContext: ['type' => 'boolean', 'description' => 'En ligne ou pas ?'])
+    ]
+    private bool $online = false;
 
     public function __construct()
     {
@@ -170,6 +239,18 @@ class Post
     public function setCategory(?Category $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getOnline(): ?bool
+    {
+        return $this->online;
+    }
+
+    public function setOnline(bool $online): self
+    {
+        $this->online = $online;
 
         return $this;
     }
