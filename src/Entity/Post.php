@@ -2,7 +2,9 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Repository\PostRepository;
 use DateTime;
 use DateTimeInterface;
@@ -14,7 +16,8 @@ use Symfony\Component\Validator\Constraints\Valid;
 /**
  * @ORM\Entity(repositoryClass=PostRepository::class)
  */
-#[ApiResource(
+#[
+    ApiResource(
     collectionOperations: [
         'get',
         'post',
@@ -27,8 +30,16 @@ use Symfony\Component\Validator\Constraints\Valid;
         'delete',
     ],
     denormalizationContext: ['groups' => ['write:Post']],
-    normalizationContext: ['groups' => ['read:collection']]
-)]
+    normalizationContext: ['groups' => ['read:collection']],
+    paginationClientItemsPerPage: true,
+    paginationItemsPerPage: 2,
+    paginationMaximumItemsPerPage: 2,
+    ),
+    ApiFilter(
+        SearchFilter::class,
+        properties: ['id' => 'exact', 'title' => 'partial']
+    )
+]
 class Post
 {
     /**
