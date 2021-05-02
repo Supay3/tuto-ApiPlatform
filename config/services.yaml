@@ -33,3 +33,6 @@ services:
         decorates: 'api_platform.openapi.factory'
         arguments: ['@App\OpenApi\OpenApiFactory.inner']
         autoconfigure: false
+
+    App\DataProvider\DependencyDataProvider:
+        arguments: ['%kernel.project_dir%']
