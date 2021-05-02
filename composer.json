@@ -1,4 +1,6 @@
 {
+    "name": "supay3/tuto-api",
+    "description": "Un projet de formation avec Grafikart sur ApiPlatform",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "dev",

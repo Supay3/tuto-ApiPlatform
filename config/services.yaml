@@ -34,5 +34,5 @@ services:
         arguments: ['@App\OpenApi\OpenApiFactory.inner']
         autoconfigure: false
 
-    App\DataProvider\DependencyDataProvider:
+    App\Repository\DependencyRepository:
         arguments: ['%kernel.project_dir%']
