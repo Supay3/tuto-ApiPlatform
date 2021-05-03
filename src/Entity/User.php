@@ -65,6 +65,11 @@ class User implements UserInterface, JWTUserInterface
      */
     private string $password = '';
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private ?string $apiKey = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -156,5 +161,17 @@ class User implements UserInterface, JWTUserInterface
     public static function createFromPayload($username, array $payload): User
     {
         return (new User())->setId($username)->setEmail($payload['username'] ?? '');
+    }
+
+    public function getApiKey(): ?string
+    {
+        return $this->apiKey;
+    }
+
+    public function setApiKey(?string $apiKey): self
+    {
+        $this->apiKey = $apiKey;
+
+        return $this;
     }
 }
