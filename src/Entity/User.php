@@ -14,7 +14,14 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
 #[ApiResource(
-    collectionOperations: [
+    collectionOperations: [],
+    itemOperations: [
+        'get' => [
+            'controller' => NotFoundAction::class,
+            'openapi_context' => ['summary' => 'hidden'],
+            'read' => false,
+            'output' => false,
+        ],
         'me' => [
             'pagination_enabled' => false,
             'path' => '/me',
@@ -24,14 +31,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
             'openapi_context' => [
                 'security' => ['cookieAuth' => ['']],
             ],
-        ],
-    ],
-    itemOperations: [
-        'get' => [
-            'controller' => NotFoundAction::class,
-            'openapi_context' => ['summary' => 'hidden'],
-            'read' => false,
-            'output' => false,
         ],
     ],
     normalizationContext: ['groups' => ['read:User']],

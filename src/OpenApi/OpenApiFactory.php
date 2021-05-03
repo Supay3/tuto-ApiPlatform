@@ -49,36 +49,51 @@ class OpenApiFactory implements OpenApiFactoryInterface
             ],
         ]);
 
+        $meOperation = $openApi->getPaths()->getPath('/api/me')->getGet()->withParameters([]);
+        $mePathItem = $openApi->getPaths()->getPath('/api/me')->withGet($meOperation);
+        $openApi->getPaths()->addPath('/api/me', $mePathItem);
+
         $pathItem = new PathItem(
             post: new Operation(
-                operationId: 'postApiLogin',
-                tags: ['User'],
-                responses: [
-                    '200' => [
-                        'description' => 'Utilisateur connecté',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    '$ref' => '#/components/schemas/User-read.User',
-                                ],
-                            ],
+            operationId: 'postApiLogin',
+            tags: ['User'],
+            responses: [
+            '200' => [
+                'description' => 'Utilisateur connecté',
+                'content' => [
+                    'application/json' => [
+                        'schema' => [
+                            '$ref' => '#/components/schemas/User-read.User',
                         ],
                     ],
                 ],
-                requestBody: new RequestBody(
-                    content: new ArrayObject([
-                        'application/json' => [
-                            'schema' => [
-                                '$ref' => '#/components/schemas/Credentials'
-                            ],
-                        ],
-                    ])
-                ),
-            ),
+            ],
+        ],
+            requestBody: new RequestBody(
+            content: new ArrayObject([
+                'application/json' => [
+                    'schema' => [
+                        '$ref' => '#/components/schemas/Credentials'
+                    ],
+                ],
+            ])
+        ),
+        ),
 
         );
-
         $openApi->getPaths()->addPath('/api/login', $pathItem);
+
+        $pathItem = new PathItem(
+            post: new Operation(
+            operationId: 'postApiLogout',
+            tags: ['User'],
+            responses: [
+            '204' => [],
+        ],
+        ),
+
+        );
+        $openApi->getPaths()->addPath('/logout', $pathItem);
 
         return $openApi;
     }
