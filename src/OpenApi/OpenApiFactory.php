@@ -28,10 +28,10 @@ class OpenApiFactory implements OpenApiFactoryInterface
         }
 
         $schemas = $openApi->getComponents()->getSecuritySchemes();
-        $schemas['cookieAuth'] = new ArrayObject([
-           'type' => 'apiKey',
-           'in' => 'cookie',
-           'name' => 'PHPSESSID',
+        $schemas['bearerAuth'] = new ArrayObject([
+           'type' => 'http',
+           'scheme' => 'bearer',
+           'bearerFormat' => 'JWT',
         ]);
 
         $schemas = $openApi->getComponents()->getSchemas();
@@ -49,6 +49,16 @@ class OpenApiFactory implements OpenApiFactoryInterface
             ],
         ]);
 
+        $schemas['Token'] = new ArrayObject([
+            'type' => 'object',
+            'properties' => [
+                'token' => [
+                    'type' => 'string',
+                    'readOnly' => true,
+                ],
+            ],
+        ]);
+
         $meOperation = $openApi->getPaths()->getPath('/api/me')->getGet()->withParameters([]);
         $mePathItem = $openApi->getPaths()->getPath('/api/me')->withGet($meOperation);
         $openApi->getPaths()->addPath('/api/me', $mePathItem);
@@ -58,17 +68,17 @@ class OpenApiFactory implements OpenApiFactoryInterface
             operationId: 'postApiLogin',
             tags: ['User'],
             responses: [
-            '200' => [
-                'description' => 'Utilisateur connecté',
-                'content' => [
-                    'application/json' => [
-                        'schema' => [
-                            '$ref' => '#/components/schemas/User-read.User',
+                '200' => [
+                    'description' => 'Token JWT',
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                '$ref' => '#/components/schemas/Token',
+                            ],
                         ],
                     ],
                 ],
             ],
-        ],
             requestBody: new RequestBody(
             content: new ArrayObject([
                 'application/json' => [
