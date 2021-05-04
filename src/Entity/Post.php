@@ -21,42 +21,43 @@ use Symfony\Component\Validator\Constraints\Valid;
  */
 #[
     ApiResource(
-    collectionOperations: [
-        'get' => [
-            'openapi_context' => [
-                'security' => [['bearerAuth' => []]],
-            ],
-        ],
-        'post',
-        'count' => [
-            'method' => 'GET',
-            'path' => '/posts/count',
-            'controller' => PostCountController::class,
-            'read' => false,
-            'pagination_enabled' => false,
-            'filters' => [],
-            'openapi_context' => [
-                'summary' => 'Récupère le nombre total d\'articles',
-                'parameters' => [
-                    [
-                        'in' => 'query',
-                        'name' => 'online',
-                        'schema' => [
-                            'type' => 'integer',
-                            'maximum' => 1,
-                            'minimum' => 0,
-                        ],
-                        'description' => 'Filtre les articles en ligne',
-                    ],
+        collectionOperations: [
+            'get' => [
+                'openapi_context' => [
+                    'security' => [['bearerAuth' => []]],
                 ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'OK',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'integer',
-                                    'exemple' => 3,
+            ],
+            'post',
+            'count' => [
+                'method' => 'GET',
+                'path' => '/posts/count',
+                'controller' => PostCountController::class,
+                'read' => false,
+                'pagination_enabled' => false,
+                'filters' => [],
+                'openapi_context' => [
+                    'summary' => 'Récupère le nombre total d\'articles',
+                    'parameters' => [
+                        [
+                            'in' => 'query',
+                            'name' => 'online',
+                            'schema' => [
+                                'type' => 'integer',
+                                'maximum' => 1,
+                                'minimum' => 0,
+                            ],
+                            'description' => 'Filtre les articles en ligne',
+                        ],
+                    ],
+                    'responses' => [
+                        '200' => [
+                            'description' => 'OK',
+                            'content' => [
+                                'application/json' => [
+                                    'schema' => [
+                                        'type' => 'integer',
+                                        'exemple' => 3,
+                                    ],
                                 ],
                             ],
                         ],
@@ -64,47 +65,44 @@ use Symfony\Component\Validator\Constraints\Valid;
                 ],
             ],
         ],
-    ],
-    itemOperations: [
-        'get' => [
-            'normalization_context' => [
-                'groups' => ['read:collection', 'read:item', 'read:post'],
-                'openapi_definition_name' => 'Detail',
+        itemOperations: [
+            'get' => [
+                'normalization_context' => [
+                    'groups' => ['read:collection', 'read:item', 'read:post'],
+                    'openapi_definition_name' => 'Detail',
+                ],
             ],
-        ],
-        'put',
-        'delete',
-        'publish' => [
-            'method' => 'POST',
-            'path' => '/posts/{id}/publish',
-            'controller' => PostPublishController::class,
-            'openapi_context' => [
-                'summary' => 'Permet de publier un article',
-                'requestBody' => [
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [],
+            'put',
+            'delete',
+            'publish' => [
+                'method' => 'POST',
+                'path' => '/posts/{id}/publish',
+                'controller' => PostPublishController::class,
+                'openapi_context' => [
+                    'summary' => 'Permet de publier un article',
+                    'requestBody' => [
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [],
+                            ],
                         ],
                     ],
                 ],
             ],
         ],
-    ],
-    denormalizationContext: ['groups' => ['write:Post']],
-    normalizationContext: [
-        'groups' => ['read:collection'],
-        'openapi_definition_name' => 'Collection',
-    ],
-    paginationClientItemsPerPage: true,
-    paginationItemsPerPage: 2,
-    paginationMaximumItemsPerPage: 2,
+        denormalizationContext: ['groups' => ['write:Post']],
+        normalizationContext: [
+            'groups' => ['read:collection'],
+            'openapi_definition_name' => 'Collection',
+        ],
+        paginationClientItemsPerPage: true,
     ),
     ApiFilter(
         SearchFilter::class,
         properties: ['id' => 'exact', 'title' => 'partial'],
     )
 ]
-class Post
+class Post implements UserOwnedInterface
 {
     /**
      * @ORM\Id
@@ -163,6 +161,11 @@ class Post
         ApiProperty(openapiContext: ['type' => 'boolean', 'description' => 'En ligne ou pas ?'])
     ]
     private bool $online = false;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="posts")
+     */
+    private ?User $user;
 
     public function __construct()
     {
@@ -255,6 +258,18 @@ class Post
     public function setOnline(bool $online): self
     {
         $this->online = $online;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }
