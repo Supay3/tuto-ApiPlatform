@@ -6,9 +6,11 @@ use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use App\Attribute\ApiAuthGroups;
 use App\Controller\PostCountController;
 use App\Controller\PostPublishController;
 use App\Repository\PostRepository;
+use App\Security\Voter\UserOwnedVoter;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -100,7 +102,11 @@ use Symfony\Component\Validator\Constraints\Valid;
     ApiFilter(
         SearchFilter::class,
         properties: ['id' => 'exact', 'title' => 'partial'],
-    )
+    ),
+    ApiAuthGroups([
+        'CAN_EDIT' => ['read:collection:Owner'],
+        'ROLE_USER' => ['read:collection:User']
+    ])
 ]
 class Post implements UserOwnedInterface
 {
@@ -124,7 +130,7 @@ class Post implements UserOwnedInterface
     /**
      * @ORM\Column(type="string", length=255)
      */
-    #[Groups(['read:collection', 'write:Post'])]
+    #[Groups(['read:collection:User', 'write:Post'])]
     private ?string $slug = null;
 
     /**
@@ -157,7 +163,7 @@ class Post implements UserOwnedInterface
      * @ORM\Column(type="boolean", options={"default": "0"})
      */
     #[
-        Groups(['read:collection']),
+        Groups(['read:collection:Owner']),
         ApiProperty(openapiContext: ['type' => 'boolean', 'description' => 'En ligne ou pas ?'])
     ]
     private bool $online = false;

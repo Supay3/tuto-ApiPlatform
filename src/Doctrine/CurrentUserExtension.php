@@ -35,8 +35,9 @@ class CurrentUserExtension implements QueryCollectionExtensionInterface, QueryIt
         if (!$reflectionClass->implementsInterface(UserOwnedInterface::class)) {
             return;
         }
-        $user = $this->security->getUser();
         $alias = $queryBuilder->getRootAliases()[0];
+        $user = $this->security->getUser();
+        return;
         if ($user) {
             $queryBuilder
                 ->andWhere("$alias.user = :current_user")

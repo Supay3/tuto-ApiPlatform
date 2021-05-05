@@ -36,3 +36,7 @@ services:
 
     App\Repository\DependencyRepository:
         arguments: ['%kernel.project_dir%']
+
+    # App\Serializer\PostContextBuilder:
+    #     decorates: 'api_platform.serializer.context_builder'
+    #     autoconfigure: false
