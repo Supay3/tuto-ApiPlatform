@@ -7,8 +7,8 @@ use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Attribute\ApiAuthGroups;
+use App\Controller\EmptyController;
 use App\Controller\PostCountController;
-use App\Controller\PostImageController;
 use App\Controller\PostPublishController;
 use App\Repository\PostRepository;
 use DateTime;
@@ -97,8 +97,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
             'image' => [
                 'method' => 'POST',
                 'path' => '/posts/{id}/image',
-                'deserialize' => false,
-                'controller' => PostImageController::class,
+                'controller' => EmptyController::class,
                 'openapi_context' => [
                     'requestBody' => [
                         'content' => [
@@ -214,6 +213,7 @@ class Post implements UserOwnedInterface
      * @var File|null
      * @Vich\UploadableField(mapping="post_image", fileNameProperty="filePath")
      */
+    #[Groups(['write:Post'])]
     private ?File $file = null;
 
     public function __construct()
